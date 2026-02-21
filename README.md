@@ -154,8 +154,6 @@ Nacrith GPU doesn't just beat traditional compressors — it compresses **well b
 
 Nacrith GPU achieves **0.76 bits/byte** — **84% below** the 0th-order Shannon limit, **78% below** the 1st-order (bigram) limit, and **72% below** even the 2nd-order (trigram) limit. This is state-of-the-art compression performance: it proves the neural model captures deep linguistic structure — grammar, semantics, long-range context — that no frequency-based or dictionary-based method can exploit. For comparison, gzip and xz both hover *above* the 2nd-order Shannon limit, unable to break through the statistical ceiling that Nacrith GPU shatters.
 
-> Run `python shannon_analysis.py` to reproduce this analysis on any text file.
-
 ---
 
 ## How It Works
