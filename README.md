@@ -8,7 +8,7 @@
 
 ### Nacrith GPU - Neural Arithmetic Compression — A Game-Changer in Text Encoding
 
-**Nacrith GPU** is a **state-of-the-art lossless** text compression system that delivers exceptional results by combining the predictive power of a neural language model with the mathematical precision of arithmetic coding. Where traditional compressors see bytes, Nacrith *understands language* — achieving compression ratios **far below the classical Shannon entropy limits** and **3-4x better than gzip, xz, and zip**.
+**Nacrith GPU** is a **lossless** text compression system that delivers exceptional results by combining the predictive power of a neural language model with the mathematical precision of arithmetic coding. Where traditional compressors see bytes, Nacrith *understands language* — achieving compression ratios **far below the classical Shannon entropy limits** and **3-4x better than gzip, xz, and zip**.
 
 At its core, Nacrith GPU pairs a small but capable LLM ([SmolLM2-135M](https://huggingface.co/HuggingFaceTB/SmolLM2-135M), 135M parameters) with an arithmetic encoder. The LLM reads text token by token and, at each step, predicts *how likely every possible next token is*. These probability predictions are fed directly into the arithmetic coder, which assigns shorter bit sequences to likely tokens and longer ones to surprises. Because the LLM captures grammar, semantics, and world knowledge — not just local byte patterns — it predicts with far higher confidence than dictionary-based methods, resulting in dramatically fewer bits per token. Both compressor and decompressor run the **exact same model**, so predictions are identical on both sides, guaranteeing **perfect lossless reconstruction**.
 
