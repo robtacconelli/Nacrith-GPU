@@ -89,7 +89,7 @@ Tested on English prose of varying sizes. GPU: NVIDIA GTX 1050 Ti.
 | large | 100.5 KB | 39.0 KB (38.8%) | 35.5 KB (35.3%) | 39.2 KB (39.0%) | **9.6 KB (9.5%)** |
 | alice29 | 148.5 KB | 52.9 KB (35.6%) | 47.4 KB (31.9%) | 53.1 KB (35.7%) | **17.0 KB (11.5%)** |
 | asyoulik | 122.2 KB | 48.8 KB (39.9%) | 45.4 KB (37.1%) | 49.0 KB (40.1%) | **19.9 KB (16.3%)** |
-| **enwik8** | **95.4 MB** | **34.9 MB (36.5%)** | **26.4 MB (27.7%)** | — | **11.2 MB (11.7%)** |
+| **enwik8** | **95.4 MB** | **34.9 MB (36.5%)** | **26.4 MB (27.7%)** | **34.8 MB (36.4%)** | **11.2 MB (11.7%)** |
 
 *Percentages = compressed / original (lower is better).*
 
