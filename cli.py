@@ -196,8 +196,12 @@ def _add_feature_args(parser):
         help="Disable N-gram model",
     )
     g.add_argument(
-        "--no-lzp", action="store_true",
+        "--no-lzp", action="store_true", default=True,
         help="Disable LZP (match) model",
+    )
+    g.add_argument(
+        "--lzp", action="store_false", dest="no_lzp",
+        help="Enable LZP (match) model",
     )
     g.add_argument(
         "--no-adaptive", action="store_true",
