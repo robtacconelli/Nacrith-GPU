@@ -43,12 +43,11 @@ Switched from PyTorch to **llama.cpp** (via `llama-cpp-python`) as the primary i
 
 ### Context Mixing Ensemble
 
-Five components work together to maximize prediction accuracy:
+Four components work together to maximize prediction accuracy:
 
 | Component | Purpose |
 |-----------|---------|
 | **N-gram model** (order 1-4) | Fast local pattern prediction with interpolated backoff |
-| **LZP model** (order 4-8) | Long-range exact match prediction |
 | **Context mixer** | Adaptive linear blending — models that predict well gain weight |
 | **Adaptive head** | Online bias correction in log-probability space |
 | **Confidence skip** | Bypasses LLM when N-gram entropy is low enough |
@@ -66,7 +65,7 @@ When the 2048-token context window fills up, the compressor now uses **native KV
 
 ### Performance Optimizations
 
-- **Integer context hashing**: N-gram and LZP models use a 64-bit rolling hash instead of tuple keys, eliminating ~54M tuple allocations per worker and reducing GC pressure
+- **Integer context hashing**: N-gram model uses a 64-bit rolling hash instead of tuple keys, eliminating ~54M tuple allocations per worker and reducing GC pressure
 - **Inner dict cap**: N-gram continuation dicts are capped at 64 entries per context, preventing progressive slowdown as common contexts accumulate hundreds of unique continuations
 - **Enhanced CDF precision**: 2^24 instead of 2^16, reducing per-token overhead from ~2 bits to ~0.004 bits
 
@@ -131,7 +130,7 @@ On standard benchmarks, Nacrith GPU outperforms all compared neural and statisti
 ### Key Observations
 
 - **Nacrith GPU achieves ~8-12% ratio** on English text — roughly **3.1x better than gzip** and **2.5x better than bzip2**, even at the 100KB scale.
-- On **enwik8** (100 MB Wikipedia), Nacrith GPU achieves **0.9389 bpb** — the best result among all compared systems — surpassing ts_zip (~1.11 bpb) by 15%, FineZip (1.024 bpb) by 8% with a 60x smaller model and no fine-tuning, and CMIX v21 (1.17 bpb) by 20%.
+- On **enwik8** (100 MB Wikipedia), Nacrith GPU achieves **0.9389 bpb** — the best result among all compared systems — outperforming ts_zip (~1.11 bpb) by 15%, FineZip (1.024 bpb) by 8% with a 60x smaller model and no fine-tuning, and CMIX v21 (1.17 bpb) by 20%.
 - On **alice29.txt** (Canterbury Corpus), Nacrith GPU achieves **0.918 bpb** — 44% better than CMIX v21 and 20% better than ts_zip.
 - Nacrith GPU saves **88-92% of space** consistently across all tested sizes, while gzip saves ~50-64% and xz saves ~48-68%.
 - Trade-off: compression speed is slower than traditional compressors since each token requires a neural network forward pass. Parallel compression with multiple workers substantially improves throughput.
@@ -262,7 +261,6 @@ Nacrith-GPU-Parallel/
 ├── model_wrapper.py        # SmolLM2-135M wrapper (llama.cpp primary, PyTorch fallback)
 ├── arithmetic_coder.py     # Arithmetic encoder/decoder (32-bit precision)
 ├── ngram_model.py          # Token-level N-gram model (order 1-4)
-├── lzp_model.py            # Lempel-Ziv Prediction model (order 4-8)
 ├── context_mixer.py        # Adaptive linear context mixer
 ├── adaptive_head.py        # Online bias correction layer
 ├── utils.py                # CDF conversion, formatting helpers
@@ -356,7 +354,7 @@ python cli.py compress input.txt output.nc --workers 1
 
 ```bash
 # Disable specific features
-python cli.py compress input.txt output.nc --no-ngram --no-lzp
+python cli.py compress input.txt output.nc --no-ngram
 
 # Adjust hyperparameters
 python cli.py compress input.txt output.nc --ngram-order 6 --temperature 0.8
@@ -377,7 +375,7 @@ python cli.py benchmark input.txt
 $ python cli.py compress alice.txt alice.nc
 Original: 148.5 KB
 Mode: text (parallel, NC05)
-Features: ngram(order=4), lzp(order=8), adaptive(lr=0.001), skip(threshold=1.5), warmup=100, workers=auto
+Features: ngram(order=4), adaptive(lr=0.001), skip(threshold=1.5), warmup=100, workers=auto
 Loading 4 llama.cpp instances...
   4 workers ready in 8.2s
 Compressing: 100.0%  [4 workers]
@@ -418,7 +416,7 @@ Used for valid UTF-8 text files. The file is split into N chunks compressed in p
 | Offset | Size | Field | Description |
 |--------|------|-------|-------------|
 | 0 | 4 bytes | Magic | `NC05` |
-| 4 | 1 byte | Flags | Feature flags (ngram, lzp, adaptive, skip) |
+| 4 | 1 byte | Flags | Feature flags (ngram, adaptive, skip) |
 | 5 | 2 bytes | Temperature | uint16, fixed-point x10000 |
 | 7 | 2 bytes | Chunk count | uint16, number of parallel chunks |
 | 9 | 12 × N bytes | Chunk table | Per chunk: token count (4B) + bit count (4B) + stream length (4B) |
