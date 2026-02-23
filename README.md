@@ -297,7 +297,13 @@ source venv/bin/activate
 # Install dependencies
 pip install torch --index-url https://download.pytorch.org/whl/cu118  # For CUDA 11.8 GPUs
 pip install transformers accelerate numpy
-pip install llama-cpp-python  # Primary inference backend
+
+# Install llama-cpp-python with CUDA support (required for GPU acceleration)
+# Without CMAKE_ARGS, it will compile for CPU only
+CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python --force-reinstall --no-cache-dir
+
+# If the above fails (e.g. CUDA toolkit not found), install the CPU-only fallback:
+# pip install llama-cpp-python
 
 # Install test dependencies
 pip install pytest
