@@ -378,7 +378,7 @@ python cli.py benchmark input.txt
 ### Example session
 
 ```
-$ python cli.py compress alice.txt alice.nc
+$ python cli.py compress --workers 1 alice.txt alice.nc
 Original: 148.5 KB
 Mode: text (parallel, NC05)
 Features: ngram(order=4), adaptive(lr=0.001), skip(threshold=1.5), warmup=100, workers=auto
