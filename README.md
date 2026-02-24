@@ -253,32 +253,6 @@ The compression ratio on binary files depends heavily on the **proportion of mea
 
 ---
 
-## Architecture
-
-```
-Nacrith-GPU-Parallel/
-├── cli.py                 # Command-line interface (compress/decompress/benchmark)
-├── parallel/
-│   ├── __init__.py
-│   └── compressor.py      # ParallelNeuralCompressor (NC05/NC06 formats)
-├── compressor.py           # NeuralCompressor core (per-worker compression engine)
-├── model_wrapper.py        # SmolLM2-135M wrapper (llama.cpp primary, PyTorch fallback)
-├── arithmetic_coder.py     # Arithmetic encoder/decoder (32-bit precision)
-├── ngram_model.py          # Token-level N-gram model (order 1-4)
-├── context_mixer.py        # Adaptive linear context mixer
-├── adaptive_head.py        # Online bias correction layer
-├── utils.py                # CDF conversion, formatting helpers
-├── requirements.txt        # Python dependencies
-├── pytest.ini              # Test configuration
-├── benchmark/              # Benchmark text files
-└── tests/
-    ├── conftest.py         # Shared fixtures (model loading)
-    ├── test_arithmetic.py  # Arithmetic coder tests (fast, no model)
-    ├── test_chunking.py    # Binary segmentation tests (fast, no model)
-    ├── test_model.py       # Model wrapper tests (slow)
-    └── test_parallel.py    # Parallel roundtrip tests (slow)
-```
-
 ## Installation
 
 ### Requirements
