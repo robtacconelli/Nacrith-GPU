@@ -232,7 +232,7 @@ class NeuralCompressor:
         verbose: bool = True,
         *,
         use_ngram: bool = True,
-        use_lzp: bool = True,
+        use_lzp: bool = False,
         use_adaptive_head: bool = True,
         use_confidence_skip: bool = True,
         ngram_order: int = DEFAULT_NGRAM_ORDER,
@@ -352,12 +352,12 @@ class NeuralCompressor:
         in_warmup = (token_index < self.warmup)
 
         # Secondary model predictions (always computed for learning)
-        ngram_probs = self.ngram.predict(context) if self.ngram else None
-        lzp_probs = self.lzp.predict(context) if self.lzp else None
+        ngram_probs = self.ngram.predict(context) if self.ngram and self.use_ngram else None
+        lzp_probs = self.lzp.predict(context) if self.lzp and self.use_lzp else None
 
         # During warmup: LLM only, no mixing, no skip
         if in_warmup:
-            llm_probs = self.model.get_probs(context).numpy()
+            llm_probs = self.model.get_probs(context)
             llm_probs = self._apply_temperature(llm_probs)
             return llm_probs, False, None
 
@@ -380,8 +380,7 @@ class NeuralCompressor:
                 )
             return probs, True, None
 
-        # LLM prediction (torch → numpy at boundary)
-        llm_probs = self.model.get_probs(context).numpy()
+        llm_probs = self.model.get_probs(context)
         llm_probs = self._apply_temperature(llm_probs)
 
         if self.adaptive_head:
@@ -408,9 +407,9 @@ class NeuralCompressor:
         llm_adjusted_probs: "np.ndarray | None",
     ):
         """Update all models after observing a token."""
-        if self.ngram:
+        if self.ngram and self.use_ngram:
             self.ngram.update(context, actual_token)
-        if self.lzp:
+        if self.lzp and self.use_lzp:
             self.lzp.update(context, actual_token)
 
         if not skipped_llm:
