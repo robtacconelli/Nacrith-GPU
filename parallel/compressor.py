@@ -41,7 +41,6 @@ import time
 import numpy as np
 
 from llama_cpp import Llama
-from transformers import AutoTokenizer
 
 from arithmetic_coder import ArithmeticEncoder, ArithmeticDecoder
 from compressor import (
@@ -164,9 +163,6 @@ class ParallelNeuralCompressor:
         self._gguf_path = gguf_path
         self._model_name = model_name
 
-        # Load shared tokenizer (used for token-count estimation only)
-        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
-
         # Spin up worker models + compressors
         if self.verbose:
             print(
@@ -187,6 +183,9 @@ class ParallelNeuralCompressor:
                 f"  {n_workers} workers ready in {elapsed:.1f}s",
                 file=sys.stderr,
             )
+
+        # Shared tokenizer for token-count estimation (reuse from first worker)
+        self._tokenizer = self._workers[0][0].tokenizer
 
         self._monitor_stop = threading.Event()
 
