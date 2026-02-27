@@ -357,7 +357,7 @@ class NeuralCompressor:
 
         # During warmup: LLM only, no mixing, no skip
         if in_warmup:
-            llm_probs = self.model.get_probs(context).numpy()
+            llm_probs = self.model.get_probs(context)
             llm_probs = self._apply_temperature(llm_probs)
             return llm_probs, False, None
 
@@ -380,8 +380,7 @@ class NeuralCompressor:
                 )
             return probs, True, None
 
-        # LLM prediction (torch → numpy at boundary)
-        llm_probs = self.model.get_probs(context).numpy()
+        llm_probs = self.model.get_probs(context)
         llm_probs = self._apply_temperature(llm_probs)
 
         if self.adaptive_head:
