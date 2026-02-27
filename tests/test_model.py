@@ -3,7 +3,7 @@
 import sys
 import os
 import pytest
-import torch
+import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -23,7 +23,7 @@ def test_device_type(model_wrapper):
 @pytest.mark.slow
 def test_get_probs_shape(model_wrapper):
     probs = model_wrapper.get_probs([1, 2, 3])
-    assert isinstance(probs, torch.Tensor)
+    assert isinstance(probs, np.ndarray)
     assert probs.ndim == 1
     assert probs.shape[0] == model_wrapper.vocab_size
 
@@ -31,15 +31,15 @@ def test_get_probs_shape(model_wrapper):
 @pytest.mark.slow
 def test_get_probs_valid_distribution(model_wrapper):
     probs = model_wrapper.get_probs([1, 2, 3])
-    assert torch.all(probs >= 0).item()
-    assert abs(probs.sum().item() - 1.0) < 1e-3
+    assert bool(np.all(probs >= 0))
+    assert abs(probs.sum() - 1.0) < 1e-3
 
 
 @pytest.mark.slow
 def test_get_probs_deterministic(model_wrapper):
     probs1 = model_wrapper.get_probs([5, 10, 15, 20])
     probs2 = model_wrapper.get_probs([5, 10, 15, 20])
-    assert torch.equal(probs1, probs2)
+    assert np.array_equal(probs1, probs2)
 
 
 @pytest.mark.slow
@@ -47,8 +47,8 @@ def test_get_probs_deterministic(model_wrapper):
 def test_different_context_lengths(model_wrapper, context_len):
     context = list(range(1, context_len + 1))
     probs = model_wrapper.get_probs(context)
-    assert torch.all(probs >= 0).item()
-    assert abs(probs.sum().item() - 1.0) < 1e-3
+    assert bool(np.all(probs >= 0))
+    assert abs(probs.sum() - 1.0) < 1e-3
 
 
 @pytest.mark.slow
