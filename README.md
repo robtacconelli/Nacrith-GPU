@@ -13,7 +13,10 @@
 At its core, Nacrith GPU pairs a small but capable LLM ([SmolLM2-135M](https://huggingface.co/HuggingFaceTB/SmolLM2-135M), 135M parameters) with an arithmetic encoder. The LLM reads text token by token and, at each step, predicts *how likely every possible next token is*. These probability predictions are fed directly into the arithmetic coder, which assigns shorter bit sequences to likely tokens and longer ones to surprises. Because the LLM captures grammar, semantics, and world knowledge — not just local byte patterns — it predicts with far higher confidence than dictionary-based methods, resulting in dramatically fewer bits per token. Both compressor and decompressor run the **exact same model**, so predictions are identical on both sides, guaranteeing **perfect lossless reconstruction**.
 
 📄 arXiv: https://arxiv.org/abs/2602.19626
+
 📦 Code v1.0 user for arXiv
+
+
 
 📦 Actual code version: v1.1
 
