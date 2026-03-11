@@ -127,6 +127,14 @@ class ModelWrapper:
 
         self.model = self._llm   # tests check `model is not None`
         self._n_tokens = 0
+        self._n_batch = self._llm.n_batch
+        # Partial cold-start bookkeeping: track the end of the last
+        # sequence of full n_batch-sized batches from the most recent
+        # cold start.  KV entries before this position are bit-identical
+        # to what any future cold start would produce (causal attention
+        # never modifies past KV entries), so they can be reused.
+        self._cold_batch_end = 0
+        self._cold_valid = False
 
     # ------------------------------------------------------------------
     # Cache management
@@ -137,6 +145,8 @@ class ModelWrapper:
         self._cache_len = 0
         self._llm.reset()
         self._n_tokens = 0
+        self._cold_batch_end = 0
+        self._cold_valid = False
 
     def _slide_kv_cache(self, keep: int):
         """Shift llama.cpp KV cache: drop oldest tokens, shift positions.
@@ -154,6 +164,7 @@ class ModelWrapper:
         self._n_tokens = keep - 1
         self._cache_len = keep - 1
         self._llm.n_tokens = keep - 1
+        self._cold_valid = False
 
     # ------------------------------------------------------------------
     # Probability prediction
@@ -197,7 +208,7 @@ class ModelWrapper:
         1. ctx_len == _n_tokens + 1  → append one token (common path)
         2. 0 < ctx_len <= _n_tokens  → context was trimmed from the front
            (sliding window); shift KV cache and eval just the last token
-        3. otherwise                 → cold start; reset and eval everything
+        3. otherwise                 → cold start (full or partial)
         """
         if self._n_tokens > 0 and ctx_len == self._n_tokens + 1:
             self._llm.eval([token_ids[-1]])
@@ -208,9 +219,26 @@ class ModelWrapper:
             self._llm.n_tokens = ctx_len - 1
             self._n_tokens = ctx_len - 1
             self._llm.eval([token_ids[-1]])
+            self._cold_valid = False
         else:
-            self._llm.reset()
-            self._llm.eval(token_ids)
+            # Cold start — reuse KV entries from previous full batches
+            # when possible.  KV entries produced by full n_batch-sized
+            # eval() calls are bit-identical across cold starts (same
+            # tokens, same batch size, causal attention).
+            reuse = (self._cold_batch_end
+                     if self._cold_valid and self._cold_batch_end > 0
+                     else 0)
+            if reuse > 0 and reuse < ctx_len:
+                # Partial cold start: keep KV 0..reuse-1, reprocess
+                # from reuse onward with the same batch alignment as
+                # a full cold start.
+                self._llm.n_tokens = reuse
+                self._llm.eval(token_ids[reuse:])
+            else:
+                self._llm.reset()
+                self._llm.eval(token_ids)
+            self._cold_batch_end = (ctx_len // self._n_batch) * self._n_batch
+            self._cold_valid = True
 
         self._n_tokens = ctx_len
         return self._llm.scores[ctx_len - 1].copy()
