@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://nacrith.com">Website</a> · <a href="https://arxiv.org/abs/2602.19626">Technical Paper (PDF)</a> · <a href="https://huggingface.co/spaces/robtacconelli/Nacrith-GPU">Try on Hugging Face</a> · <a href="https://github.com/st4ck/Nacrith-CPU">CPU Version</a>
+  <a href="https://nacrith.com">Website</a> · <a href="https://arxiv.org/abs/2602.19626">Technical Paper (PDF)</a> · <a href="https://huggingface.co/spaces/robtacconelli/Nacrith-GPU">Try on Hugging Face</a> 
 </p>
 
 ### Nacrith GPU - Neural Arithmetic Compression — A Game-Changer in Text Encoding
